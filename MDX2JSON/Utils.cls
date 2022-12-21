@@ -128,7 +128,7 @@ ClassMethod WriteDrillthroughJSON(pMDX As %String) As %Status
 	return:$$$ISERR(st) st
 	
 	set SQL = RS.%GetListingSQL()
-	do ##class(%ZEN.Auxiliary.jsonSQLProvider).%WriteJSONFromSQL(,SQL,,$$$MaxCacheInt)
+	do ##class(%ZEN.Auxiliary.altJSONSQLProvider).%WriteJSONFromSQL(,SQL,,$$$MaxCacheInt)
 
 	return $$$OK
 }
