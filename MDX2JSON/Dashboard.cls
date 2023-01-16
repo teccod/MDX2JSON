@@ -146,7 +146,10 @@ ClassMethod WidgetToProxyObject(Widget As %DeepSee.Dashboard.Widget, CubeName As
 	
 	for i=1:1:Widget.dataProperties.Count()
 	{
-		set dataProperty = ..WidgetDataPropertyToProxyObject(Widget.dataProperties.GetAt(i))
+		set widgetData = Widget.dataProperties.GetAt(i)
+ 		d ##class(%ZEN.Auxiliary.jsonProvider).%ConvertJSONToObject(widgetData.override,,.override)
+ 		set widgetData.override = override
+ 		set dataProperty = ..WidgetDataPropertyToProxyObject(widgetData)
 		if $IsObject(dataProperty) {
 			$$$Insert(obj.dataProperties,dataProperty)
 		}
