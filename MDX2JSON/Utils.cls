@@ -188,7 +188,9 @@ ClassMethod WriteFiltersForDataSource(pDataSource As %String, pValues As %Boolea
 			set key = $order(tFilters(key))
 	   	}
 	}
-   	
+   	//this logic simply replace "4" in array to "Yaxis","Yaxis","" and pass it to the %ArrayToJSON
+	if $g(tFilters(28))=4 set tFilters(28)=$lb("Yaxis","Yaxis","")
+
    	set st = ##class(%ZEN.Auxiliary.jsonProvider).%ArrayToJSON($lb("name","path","info"),.tFilters)
 
 	return st
