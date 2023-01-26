@@ -184,12 +184,12 @@ ClassMethod WriteFiltersForDataSource(pDataSource As %String, pValues As %Boolea
 		while (key '= "") {
 			set st = ##class(%DeepSee.Dashboard.Utils).%GetMembersForFilter(pDataSource,$lg(tFilters(key),2),.tMembers,.tDefaultFilterValue,pSearchKey,.pRelatedFilters,0,,.tValueList)
 			return:$$$ISERR(st) st
+			if $NUMBER($g(tMembers),"I") set tMembers = $g(tFilters(key)) // check if list contain simple number and replace it with proper query
 			merge tFilters(key) = tMembers // merge filter values
 			set key = $order(tFilters(key))
 	   	}
 	}
-   	//this logic simply replace "4" in array to "Yaxis","Yaxis","" and pass it to the %ArrayToJSON
-	if $g(tFilters(28))=4 set tFilters(28)=$lb("Yaxis","Yaxis","")
+   	
 
    	set st = ##class(%ZEN.Auxiliary.jsonProvider).%ArrayToJSON($lb("name","path","info"),.tFilters)
 
