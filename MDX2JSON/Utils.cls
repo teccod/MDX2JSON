@@ -184,14 +184,16 @@ ClassMethod WriteFiltersForDataSource(pDataSource As %String, pValues As %Boolea
 		while (key '= "") {
 			set st = ##class(%DeepSee.Dashboard.Utils).%GetMembersForFilter(pDataSource,$lg(tFilters(key),2),.tMembers,.tDefaultFilterValue,pSearchKey,.pRelatedFilters,0,,.tValueList)
 			return:$$$ISERR(st) st
+			if +$g(tMembers) set tMembers = $g(tFilters(key)) // check if list contain simple number and replace it with proper query
 			merge tFilters(key) = tMembers // merge filter values
 			set key = $order(tFilters(key))
 	   	}
 	}
    	
-   	set st = ##class(%ZEN.Auxiliary.jsonProvider).%ArrayToJSON($lb("name","path","info"),.tFilters)
 
-	return st
+   	Set tAET = ##class(%ZEN.Auxiliary.altJSONProvider).%ArrayToAET($lb("name", "path", "info"), .tFilters)
+	do tAET.%ToJSON()
+	return tAET
 }
 
 /// Get information about pivot. <br>
