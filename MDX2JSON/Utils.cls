@@ -191,9 +191,7 @@ ClassMethod WriteFiltersForDataSource(pDataSource As %String, pValues As %Boolea
 	}
    	
 
-   	Set tAET = ##class(%ZEN.Auxiliary.altJSONProvider).%ArrayToAET($lb("name", "path", "info"), .tFilters)
-	do tAET.%ToJSON()
-	set st = tAET
+   	Set st = ##class(%ZEN.Auxiliary.altJSONProvider).%ArrayToJSON($lb("name", "path", "info"),.tFilters)
 	return st
 }
 
