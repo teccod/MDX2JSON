@@ -191,9 +191,8 @@ ClassMethod WriteFiltersForDataSource(pDataSource As %String, pValues As %Boolea
 	}
    	
 
-   	Set arrayToJson = ##class(%ZEN.Auxiliary.altJSONProvider).%ArrayToJSON($lb("name", "path", "info"),.tFilters)
-
-	return $$$OK
+   	Set st = ##class(%ZEN.Auxiliary.altJSONProvider).%ArrayToJSON($lb("name", "path", "info"),.tFilters)
+	return st
 }
 
 /// Get information about pivot. <br>
