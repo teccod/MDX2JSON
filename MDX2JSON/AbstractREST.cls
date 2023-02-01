@@ -65,6 +65,14 @@ ClassMethod ConvertRequestBody() As %Status
 	return:$$$ISERR(st) st
 	return:'$IsObject(obj) $$$ERROR($$$ArgumentIsNotAnObject,"Body")
 
+	// if this is a KPI request content 
+	if ($FIND(obj.KPI, ".kpi") = ($LENGTH(obj.KPI) + 1)) {
+		// Prepare DynamicObject instead of proxyObject
+		// Without this we got error later "ERROR #5002: ObjectScript error: <METHOD DOES NOT EXIST>zWriteJSONfromKPI+8^MDX2JSON.REST.1 *%Size,%Library.ListOfObjects
+		// while applying filters to KPI
+		set obj = {}.%FromJSON(content)
+	}
+
 	set %request.Content = obj // obj here is a valid UTF8 proxyObject with required property
 	return $$$OK
 }
