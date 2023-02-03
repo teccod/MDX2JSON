@@ -316,6 +316,15 @@ ClassMethod ExecuteAction(Cube As %String, Action As %String) As %Status
 /// See correspontding method from DeepSee.REST.v1.InfoServer 
 ClassMethod WritePivotVariablesForCube(Cube As %String) As %Status
 {
+	// Workaround of non-working passing URL variables in get requests
+	if %request.Method = "POST" {
+		set Cube = $$$R("Cube") // from the body of request
+	} else {
+		if (Cube = "") {
+			return $$$ERROR("No Cube requested")
+		}
+	} // end of workaround
+	
 	set Cube = $ZCONVERT($ZCONVERT(Cube,"I","URL") ,"I","UTF8")
 	return ##class(MDX2JSON.Utils).WritePivotVariablesForCube(Cube)
 }
