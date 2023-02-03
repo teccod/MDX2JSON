@@ -31,7 +31,11 @@ Method %Next(ByRef sc As %Library.Status) As %Integer [ PlaceAfter = %Execute ]
     set id = ..id
     return:id="" $$$NO
     
-    set ..title = ##class(%DeepSee.UserPortal.Utils).%ResolveText(##class(%DeepSee.UserLibrary.FolderItem).titleGetStored(id))
+	set title = ##class(%DeepSee.UserPortal.Utils).%ResolveText(##class(%DeepSee.UserLibrary.FolderItem).titleGetStored(id))
+	// While empty Title use Name instead
+	set:(title="") title = ##class(%DeepSee.UserPortal.Utils).%ResolveText(##class(%DeepSee.UserLibrary.FolderItem).nameGetStored(id))
+	
+    set ..title = title
     set ..path =  ..GetDashFullName(id)
     set ..cover = ##class(MDX2JSON.Dashboard).GetDashCover(##class(%DeepSee.UserLibrary.FolderItem).bookCoverGetStored(id))
     
