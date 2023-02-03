@@ -13,7 +13,8 @@
     CookiePath="/MDX2JSON/"
     PasswordAuthEnabled="1"
     UnauthenticatedEnabled="1"
-    DispatchClass="MDX2JSON.REST" 
+    DispatchClass="MDX2JSON.REST"
+    Recurse="1"
     />
 </Module>
 </Document></Export>
