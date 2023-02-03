@@ -363,7 +363,7 @@ ClassMethod GetWidgetCube(Dashboard As %DeepSee.Dashboard.Definition, WidgetNumb
 		set cube = ##class(%DeepSee.Dashboard.Pivot).cubeNameGetStored(id)
 	} else {
 		// KPIs and Worksheets
-		set cube = ""
+		set cube = datasource
 	}
 	return cube
 }
