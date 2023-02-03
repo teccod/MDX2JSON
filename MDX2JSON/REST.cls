@@ -71,6 +71,7 @@ XData UrlMap
    
    <!-- Get info about pivot variables-->
    <Route Url="/PivotVariables/:Cube" Method="GET" Call="WritePivotVariablesForCube"/>
+   <Route Url="/PivotVariables" Method="POST" Call="WritePivotVariablesForCube"/>
 
    <!-- Get info about user config-->
    <Route Url="/Config" Method="POST" Call="SetConfig"/>
