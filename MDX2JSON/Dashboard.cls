@@ -253,7 +253,7 @@ ClassMethod WidgetControlToProxyObject(Widget As %DeepSee.Dashboard.Widget, Numb
 		}
 	}
 
-	set:((obj.action="applyFilter") || (obj.action="setFilter")) obj.values = ..GetMembersForFilter(CubeName,obj.targetProperty)
+	set:((obj.action="applyFilter") || (obj.action="setFilter") || (obj.action="applyVariable")) obj.values = ..GetMembersForFilter(CubeName,obj.targetProperty)
 	return obj
 }
 
