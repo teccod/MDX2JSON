@@ -48,6 +48,7 @@ ClassMethod WidgetFiltersToProxyObject(Widget As %DeepSee.Dashboard.Widget, Cube
 /// Converts %DeepSee.Dashboard.Control object into %ZEN.proxyObject, handles run-time DeepSee variables.
 ClassMethod WidgetControlToProxyObject(Widget As %DeepSee.Dashboard.Widget, Number As %Integer, Cube As %String) As %ZEN.proxyObject [ Internal ]
 {
+	// last OR is suppose to show filters variable in dropdown menu in case of applyVariable type filter
 	return:((Widget.controls.GetAt(Number).action="applyFilter") || (Widget.controls.GetAt(Number).action="setFilter") || (Widget.controls.GetAt(Number).action="applyVariable")) ""
 	return ##class(MDX2JSON.Dashboard).WidgetControlToProxyObject(Widget,Number,Cube)
 }
@@ -55,6 +56,7 @@ ClassMethod WidgetControlToProxyObject(Widget As %DeepSee.Dashboard.Widget, Numb
 /// Converts %DeepSee.Dashboard.Control object into %ZEN.proxyObject, handles run-time DeepSee variables.
 ClassMethod WidgetFilterToProxyObject(Widget As %DeepSee.Dashboard.Widget, Number As %Integer, Cube As %String) As %ZEN.proxyObject [ Internal ]
 {
+	// last OR is suppose to show filters variable in dropdown menu in case of applyVariable type filter
 	return:'((Widget.controls.GetAt(Number).action="applyFilter") || (Widget.controls.GetAt(Number).action="setFilter") || (Widget.controls.GetAt(Number).action="applyVariable")) ""
 	return ##class(MDX2JSON.Dashboard).WidgetControlToProxyObject(Widget,Number,Cube)
 }

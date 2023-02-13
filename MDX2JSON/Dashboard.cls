@@ -252,7 +252,7 @@ ClassMethod WidgetControlToProxyObject(Widget As %DeepSee.Dashboard.Widget, Numb
 			set obj.value = "&[" _ value _ "]"
 		}
 	}
-
+	// last OR is suppose to populate dashboard with values in case of applyVariable type filter
 	set:((obj.action="applyFilter") || (obj.action="setFilter") || (obj.action="applyVariable")) obj.values = ..GetMembersForFilter(CubeName,obj.targetProperty)
 	return obj
 }
