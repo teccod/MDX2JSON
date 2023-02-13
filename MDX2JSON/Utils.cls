@@ -346,7 +346,7 @@ ClassMethod ExecuteAction(Cube As %String, Action As %String, Context As %ZEN.pr
 {
 	set st = $$$OK
 	set Cube = $$$UPPER(Cube)
-	if $FIND(Cube, ".KPI") set Cube = $TRANSLATE(Cube, ".KPI", "") // cut off resolution ".kpi" from Cube name if there any 
+	if $FIND(Cube, ".KPI") set Cube = $TRANSLATE(Cube, ".KPI", "") // cut off extension ".kpi" from Cube name if there any 
 	set ActionClass = $G($$$DeepSeeMetaGLVN("cubes",Cube,"actionClass"), $G($$$DeepSeeMetaGLVN("kpis",Cube)))
 	if (ActionClass'="") {
 		set st = $classmethod(ActionClass,"%OnDashboardAction",Action,Context)
