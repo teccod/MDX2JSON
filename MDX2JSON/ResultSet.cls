@@ -189,7 +189,7 @@ Method ProcessOneAxisCell(CubeIndex, AxisKey, CubeName, QueryKey, AxisNumber, No
 
 	do ##class(%DeepSee.Utils).%GetDimensionCaption(CubeName,tDimNo, tHierNo,tLevelNo, .tAxisCaption)
 	set cell.dimension = tAxisCaption // cube dimension
-	if (cell.dimension) = "" {set cell.dimension = tCaption} // hack for assigne dimension property for calcMembers specifically
+	if (cell.dimension = "") {set cell.dimension = tCaption} // hack for assigne dimension property for calcMembers specifically
 	
 
 	set:$$$Debug cell.visible = '..IsCellNull(cell,AxisNumber,Node)
