@@ -185,10 +185,12 @@ Method ProcessOneAxisCell(CubeIndex, AxisKey, CubeName, QueryKey, AxisNumber, No
 	set tDimNo = $LG(tNode,9)
 	set tHierNo = $LG(tNode,10)
 	set tLevelNo = $LG(tNode,11)
+	set tCaption = $LG(tNode, 5)
 
 	do ##class(%DeepSee.Utils).%GetDimensionCaption(CubeName,tDimNo, tHierNo,tLevelNo, .tAxisCaption)
 	set cell.dimension = tAxisCaption // cube dimension
-
+	if (cell.dimension = "") {set cell.dimension = tCaption} // hack for assigne dimension property for calcMembers specifically
+	
 
 	set:$$$Debug cell.visible = '..IsCellNull(cell,AxisNumber,Node)
 	set:$$$Debug cell.node = Node
