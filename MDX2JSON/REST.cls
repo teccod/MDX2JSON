@@ -48,6 +48,7 @@ XData UrlMap
    <Route Url="/CancelQuery/:CubeKey/:QueryKey" Method="GET" Call="%DeepSee.ResultSet:%CancelQuery"/>
    <Route Url="/MDX2JSONP" Method="POST" Call="WriteJSONPfromMDX"/>
    <Route Url="/MDXDrillthrough" Method="POST" Call="WriteDrillthroughJSON" />
+   <Route Url="/KPIDrillthrough" Method="POST" Call="WriteDrillthroughJSONKPI" />
    <Route Url="/MDX2XMLA" Method="POST" Call="WriteXMLAfromMDX" />
 
    <!-- Get info about availible filters and their values -->
@@ -179,6 +180,13 @@ ClassMethod GetDashboardList() As %Status
 ClassMethod WriteDrillthroughJSON() As %Status
 {
 	return ##class(MDX2JSON.Utils).WriteDrillthroughJSON($$$R("MDX"))
+}
+
+/// Wrapper for ##class(MDX2JSON.Utils).WriteDrillthroughJSON(SQL).<br>
+/// Converts incoming request object and calls abovementioned method.
+ClassMethod WriteDrillthroughJSONKPI() As %Status
+{
+	return ##class(MDX2JSON.Utils).WriteDrillthroughJSONKPI($$$R("SQL")) // get sql from kpi and process it to get listing
 }
 
 /// Wrapper for ##class(MDX2JSON.Utils).WriteJSONPfromMDX(pMDX)
