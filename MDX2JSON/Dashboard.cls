@@ -123,7 +123,8 @@ ClassMethod WidgetToProxyObject(Widget As %DeepSee.Dashboard.Widget, CubeName As
 		set:portletClass="" portletClass = Widget.subtype
 		set obj.settings = ..PortletSettingsToArray(portletClass)
 	}
-
+	set widgetData = Widget.dataProperties.GetAt(1) 
+	set obj.format = widgetData.format // duplicating format data in case of incompatible widget 
 	set obj.mdx = $g(mdx)
 	set obj.name = Widget.name
 	set obj.basemdx = $g(basemdx)
