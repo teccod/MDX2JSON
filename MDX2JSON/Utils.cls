@@ -133,31 +133,29 @@ ClassMethod WriteDrillthroughJSON(pMDX As %String) As %Status
 	return $$$OK
 }
 
-ClassMethod TestSQLObject(ByRef tSQL As %String)
+ClassMethod TestSQL(ByRef tSQL As %String) [ Language = python ]
 {
-	set ForbiddenLines = $lb("DROP", "DELETE", "TRUNCATE", "ALTER", "GRANT", "REVOKE", "CREATE")
+	import iris
+	pSQL = tSQL.upper()
 
-   	set ptr=0
-   	while $LISTNEXT(ForbiddenLines,ptr,value) { // checking sql query for general injection words
-      
-      	set substring = $SELECT($DATA(value):value,1:"omitted")
-	  	set position = $FIND(tSQL, substring)
-    	if (position > 0)
-		{
-			set tSQL = "error"
-			quit 
-		}	 		
-   }
-   
-   quit tSQL
+	forbiden_lines = ["DROP", "DELETE", "TRUNCATE", "ALTER", "GRANT", "REVOKE", "CREATE"]
+
+	# check if any of the forbiden_lines contains in pSQL
+	for words in forbiden_lines:
+		if pSQL.find(words) > 0:
+			pSQL = "" # return empty line if any
+			break
+
+	
+	return pSQL
 }
 
 ClassMethod WriteDrillthroughJSONKPI(pSQL As %String) As %Status
 {
 
-	set tSQL = ..TestSQLObject(pSQL)
+	set tSQL = ..TestSQL(pSQL)
 
-	if (tSQL="error") {	// return empty sql if forbidden sql query is detected
+	if (tSQL="") {	// return empty sql if forbidden sql query is detected
 		write "Forbidden query" 
 		quit
 	}
@@ -168,7 +166,7 @@ ClassMethod WriteDrillthroughJSONKPI(pSQL As %String) As %Status
 
 	// Check for errors
 	If $$$ISERR(status) {
-		write "Error preparing SQL statement: ", $System.Status.GetErrorText(status), !
+		write "Error preparing SQL statement or query is forbidden: ", $System.Status.GetErrorText(status), !
 		quit
 	}
 	
