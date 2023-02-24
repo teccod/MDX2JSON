@@ -115,8 +115,10 @@ ClassMethod WidgetToProxyObject(Widget As %DeepSee.Dashboard.Widget, CubeName As
 	if $piece(Widget.dataSource, ".", *) = "kpi" {
 		set kpiClass = ##class(%DeepSee.Utils).%GetKPIClass(Widget.dataSource)
 		set obj.kpitype = $classmethod(kpiClass, "%GetSourceType")
-		set widgetData = Widget.dataProperties.GetAt(1) 
-		set obj.format = widgetData.format // duplicating format data in case of incompatible widget
+		if (Widget.dataProperties.GetAt(1)) { // check if KPI have dataProperies
+			set widgetData = Widget.dataProperties.GetAt(1) // duplicating format data in case of KPI
+			set obj.format = widgetData.format
+			} 
 	}
 	
 	// Widget is a portlet
