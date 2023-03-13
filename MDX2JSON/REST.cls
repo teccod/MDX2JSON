@@ -186,7 +186,14 @@ ClassMethod WriteDrillthroughJSON() As %Status
 /// Converts incoming request object and calls abovementioned method.
 ClassMethod WriteDrillthroughJSONKPI() As %Status
 {
-	return ##class(MDX2JSON.Utils).WriteDrillthroughJSONKPI($$$R("SQL")) // get sql from kpi and process it to get listing
+	set KPI = $$$R("KPI")
+	set SortOrder = $$$R("SortOrder")
+	set Filters = $$$R("Filters")
+	set SortColumn = $$$R("SortColumn")
+
+	set pSelection = SortColumn _ "," _ SortOrder
+	
+	return ##class(MDX2JSON.Utils).WriteDrillthroughJSONKPI(KPI, Filters, pSelection)
 }
 
 /// Wrapper for ##class(MDX2JSON.Utils).WriteJSONPfromMDX(pMDX)
