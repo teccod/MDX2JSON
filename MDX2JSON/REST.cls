@@ -48,7 +48,7 @@ XData UrlMap
    <Route Url="/CancelQuery/:CubeKey/:QueryKey" Method="GET" Call="%DeepSee.ResultSet:%CancelQuery"/>
    <Route Url="/MDX2JSONP" Method="POST" Call="WriteJSONPfromMDX"/>
    <Route Url="/MDXDrillthrough" Method="POST" Call="WriteDrillthroughJSON" />
-   <Route Url="/KPIDrillthrough" Method="POST" Call="WriteDrillthroughJSONKPI" />
+   <Route Url="/KPI" Method="POST" Call="KPIExecute"/>
    <Route Url="/MDX2XMLA" Method="POST" Call="WriteXMLAfromMDX" />
 
    <!-- Get info about availible filters and their values -->
@@ -85,8 +85,7 @@ XData UrlMap
    <!-- Valid but illicit, do not use-->
    <Route Url="/MDX/:query" Method="GET" Call="WriteJSONfromMDXURL"/>
    <Route Url="/MDXfilters/:query" Method="GET" Call="WriteFiltersForMDX"/>
-   
-    <Route Url="/KPI" Method="POST" Call="WriteJSONfromKPI"/>
+  
 
    <!-- Test methods-->
    <Route Url="/Test" Method="GET" Call="Test"/>
@@ -182,18 +181,29 @@ ClassMethod WriteDrillthroughJSON() As %Status
 	return ##class(MDX2JSON.Utils).WriteDrillthroughJSON($$$R("MDX"))
 }
 
-/// Wrapper for ##class(MDX2JSON.Utils).WriteDrillthroughJSON(SQL).<br>
-/// Converts incoming request object and calls abovementioned method.
-ClassMethod WriteDrillthroughJSONKPI() As %Status
-{
-	set KPI = $$$R("KPI")
-	set SortOrder = $$$R("SortOrder")
-	set Filters = $$$R("Filters")
-	set SortColumn = $$$R("SortColumn")
 
-	set pSelection = SortColumn _ "," _ SortOrder
-	
-	return ##class(MDX2JSON.Utils).WriteDrillthroughJSONKPI(KPI, Filters, pSelection)
+ClassMethod KPIExecute() As %Status
+{
+	try{
+		set KPI = $$$R("KPI")
+		set SortOrder = $$$R("SortOrder")
+		set Filters = $$$R("Filters")
+		set SortColumn = $$$R("SortColumn")
+		set Drillthrough = $$$R("Drillthrough")
+		set pSelection = SortColumn _ "," _ SortOrder	
+
+		if (Drillthrough = 1){
+			set st = ##class(MDX2JSON.Utils).WriteDrillthroughJSONKPI(KPI, Filters, pSelection)
+		}
+		else {
+			set st = ##class(%DeepSee.REST.v1.DataServer).WriteJSONfromKPI(KPI)
+		}
+
+	}catch ex {
+		set st=ex.AsStatus()
+	}
+
+	return st
 }
 
 /// Wrapper for ##class(MDX2JSON.Utils).WriteJSONPfromMDX(pMDX)
