@@ -169,7 +169,7 @@ ClassMethod WriteDrillthroughJSONKPI(tKPI As %String, pFilters As %String, pSele
 		
 		set qKpi = $classmethod(tKpiClassName, "%OnGetListingSQL", pFilters,pSelection) // invoke corresponding method from given kpi and get sql query
 		
-		set tSQL = ..TestSQL(qKpi, pFilters) // check for sql injection
+		set tSQL = ..TestSQL(qKpi, pFilters, pSelection) // check for sql injection
 		if (tSQL="error") {	// return empty sql if sql injection query is detected
 			write "Forbidden query" 
 			quit
