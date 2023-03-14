@@ -133,6 +133,71 @@ ClassMethod WriteDrillthroughJSON(pMDX As %String) As %Status
 	return $$$OK
 }
 
+ClassMethod TestSQL(ByRef sKpi As %String, pFilters As %String, pSelection As %String) As %Status
+{
+	set sc = $$$OK
+	set ForbiddenLines = $lb("DROP", "DELETE", "TRUNCATE", "ALTER", "GRANT", "REVOKE", "CREATE")
+
+   	set ptr=0
+   	WHILE $LISTNEXT(ForbiddenLines,ptr,value) {
+      
+      	set substring = $SELECT($DATA(value):value,1:"omitted")
+	  	set SQLposition = $FIND(sKpi, substring) // check sql for injection
+		set fPosition = $FIND(pFilters, substring)
+		set sPosition = $FIND(pSelection, substring)
+    	if (SQLposition > 0 || fPosition > 0 || sPosition > 0)
+		{
+			set sKpi = "error"
+			quit 
+		}	 		
+   }
+   set sc = sKpi
+   quit sc
+}
+
+ClassMethod WriteDrillthroughJSONKPI(tKPI As %String, pFilters As %String, pSelection As %String) As %Status
+{
+	 
+	Set tSC = $$$OK
+	
+	Set tKpiClassName = ##class(%DeepSee.Utils).%GetKPIClass(tKPI,.tSC) // get name of a kpi from REST
+	set kpitype = $classmethod(tKpiClassName, "%GetSourceType") // get name of kpi type
+	
+	if $$$ISERR(tSC) Quit
+	
+	if (kpitype="sql") {
+		
+		set qKpi = $classmethod(tKpiClassName, "%OnGetListingSQL", pFilters,pSelection) // invoke corresponding method from given kpi and get sql query
+		
+		set tSQL = ..TestSQL(qKpi, pFilters, pSelection) // check for sql injection
+		if (tSQL="error") {	// return empty sql if sql injection query is detected
+			write "Forbidden query" 
+			quit
+		} 
+	
+	}elseif (kpitype="mdx") {
+			write "Drillthrough for mdx type kpi not developed yet"
+			quit
+			  
+	}else{
+		write "Unknown kpi type:" _ " " _ kpitype 
+		quit
+	}
+
+	Set statement = ##class(%SQL.Statement).%New()
+	Set status = statement.%Prepare(tSQL) // Prepare the SQL query
+
+	If $$$ISERR(status) { // Check for errors
+		write "Error preparing SQL statement: ", $System.Status.GetErrorText(status), !
+		quit
+	}
+	else{
+		do ##class(%ZEN.Auxiliary.altJSONSQLProvider).%WriteJSONFromSQL(,tSQL,,$$$MaxCacheInt) // receiving sql and process it 
+	}
+	
+	return $$$OK
+}
+
 /// Automatic processing of MDX query and outputting resulting XML/A.<br>
 /// <b>pMDX</b> - String containing MDX query.<br>
 ClassMethod WriteXMLAfromMDX(pMDX As %String) As %Status
@@ -146,6 +211,8 @@ ClassMethod WriteXMLAfromMDX(pMDX As %String) As %Status
 
 	return st
 }
+
+
 
 /// Gets filters for MDX expression.<br>
 /// <b>pMDX</b> - String containing MDX query.<br>
