@@ -239,8 +239,8 @@ ClassMethod ProcesstextMeter(Widget As %DeepSee.Dashboard.Widget, Obj As %ZEN.pr
 			{ 
 				$$$Insert(Obj.dataProperties,dataProperty)
 			}
+	  }
 
-	}
 	}
 }
 
