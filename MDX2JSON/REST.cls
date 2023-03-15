@@ -186,13 +186,15 @@ ClassMethod KPIExecute() As %Status
 {
 	try{
 		set KPI = $$$R("KPI")
-		set SortOrder = $$$R("SortOrder")
-		set Filters = $$$R("Filters")
-		set SortColumn = $$$R("SortColumn")
 		set Drillthrough = $$$R("Drillthrough")
-		set pSelection = SortColumn _ "," _ SortOrder	
-
+		
 		if (Drillthrough = 1){
+			
+			set SortOrder = $$$R("SortOrder")
+			set Filters = $$$R("Filters")
+			set SortColumn = $$$R("SortColumn")
+			set pSelection = SortColumn _ "," _ SortOrder
+			
 			set st = ##class(MDX2JSON.Utils).WriteDrillthroughJSONKPI(KPI, Filters, pSelection)
 		}
 		else {
