@@ -89,6 +89,28 @@ ClassMethod WriteJSONfromQuery(CubeKey As %String, QueryKey As %String, Timeout 
 	return $$$OK
 }
 
+ClassMethod WriteDrillthroughJSONKPI(tKPI As %String, pFilters As %String, pSelection As %String) As %Status
+{
+
+	Set st = $$$OK
+	
+	Set tKpiClassName = ##class(%DeepSee.Utils).%GetKPIClass(tKPI,.tSC) // get name of a kpi from REST
+	set kpitype = $classmethod(tKpiClassName, "%GetSourceType")
+	
+	if (kpitype="sql") {
+		set pSQL = $classmethod(tKpiClassName, "%OnGetListingSQL", pFilters,pSelection) // invoke corresponding method from given kpi and get sql query
+
+		}else{
+		
+			quit $$$ERROR($$$GeneralError, "KPI type " _ kpitype _ " not supported")
+	}
+
+	set st = ##class(%ZEN.Auxiliary.altJSONSQLProvider).%WriteJSONFromSQL(,pSQL,,$$$MaxCacheInt) // receiving sql and process it 
+	return:$$$ISERR(st) st
+	
+	return st
+}
+
 /// Automatic processing of MDX query and outputting resulting JSONP.<br>
 /// <b>pMDX</b> - String containing MDX query.<br>
 ClassMethod WriteJSONPfromMDX(pMDX As %String) As %Status

@@ -49,6 +49,7 @@ XData UrlMap
    <Route Url="/MDX2JSONP" Method="POST" Call="WriteJSONPfromMDX"/>
    <Route Url="/MDXDrillthrough" Method="POST" Call="WriteDrillthroughJSON" />
    <Route Url="/MDX2XMLA" Method="POST" Call="WriteXMLAfromMDX" />
+   <Route Url="/KPI" Method="POST" Call="KPIExecute"/>
 
    <!-- Get info about availible filters and their values -->
    <Route Url="/Filters" Method="POST" Call="WriteFiltersForDataSource"/>
@@ -85,7 +86,6 @@ XData UrlMap
    <Route Url="/MDX/:query" Method="GET" Call="WriteJSONfromMDXURL"/>
    <Route Url="/MDXfilters/:query" Method="GET" Call="WriteFiltersForMDX"/>
    
-    <Route Url="/KPI" Method="POST" Call="WriteJSONfromKPI"/>
 
    <!-- Test methods-->
    <Route Url="/Test" Method="GET" Call="Test"/>
@@ -218,6 +218,33 @@ ClassMethod WriteFiltersForDataSource() As %Status
 
    	set st = ##class(MDX2JSON.Utils).WriteFiltersForDataSource(DataSource, Values, Search, .RelatedFilters, RequestedFilters)
   	return st
+}
+
+///Execute requests from kpi
+ClassMethod KPIExecute() As %Status
+{
+	try{
+		set KPI = $$$R("KPI")
+		set Drillthrough = $$$R("Drillthrough")
+			
+
+		if (Drillthrough = 1){
+			set SortOrder = $$$R("SortOrder")
+			set Filters = $$$R("Filters")
+			set SortColumn = $$$R("SortColumn")
+			set pSelection = SortColumn _ "," _ SortOrder
+
+			set st = ##class(MDX2JSON.Utils).WriteDrillthroughJSONKPI(KPI, Filters, pSelection)
+		}
+		else {
+			set st = ##class(%DeepSee.REST.v1.DataServer).WriteJSONfromKPI(KPI)
+		}
+
+	}catch ex {
+		set st=ex.AsStatus()
+	}
+
+	return st
 }
 
 /// Wrapper for ##class(MDX2JSON.Utils).WriteJSONPfromMDX(pMDX)<br>
