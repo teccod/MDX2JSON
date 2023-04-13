@@ -96,6 +96,39 @@ ClassMethod WidgetsToProxyObject(Dashboard As %DeepSee.Dashboard.Definition, Out
 	return st
 }
 
+
+/// A very specific method of displaying the data type for cube measures. 
+/// Serves for the convenience of front-end development of the filter widget. 
+/// The return is something like this <b>%DeepSee.Time.DayMonthYear</b>
+ClassMethod GetCubeMeasuresDataType(Widget, Number, CubeName, Output DataType As %String) As %Status
+{
+
+	set st = $$$OK
+	set obj = $$$NewDynObj
+	set st = Widget.controls.GetAt(Number).%CopyTo(obj) // copy widget control properties to proxyObj
+	set dataSource = $piece(Widget.dataSource, ".", *) // get dataSource type
+
+
+	if (dataSource '= "kpi"){
+		if ($FIND(obj.targetProperty, "[")){
+			set tMeasure = $TRANSLATE(obj.targetProperty, "[]", "")
+
+			set st = ##class(%DeepSee.Utils).%GetDimensionInfo(CubeName,tMeasure,.pDimNo,.pHierNo,.pLevelNo) // get positional info about dimension
+			
+			Set tMbrInfo = $G($$$DeepSeeMetaGLVN("cubes",$$$UPPER(CubeName),"mbr#",pDimNo,pHierNo,pLevelNo))
+			set DataType = $LG(tMbrInfo,6) // get data type
+	}else{
+
+		set DataType = ""
+	}
+	}else{
+
+		set DataType = ""
+	}
+	
+	return st
+}
+
 /// Converts relevant parts of %DeepSee.Dashboard.Widget object into %ZEN.proxyObject.
 ClassMethod WidgetToProxyObject(Widget As %DeepSee.Dashboard.Widget, CubeName As %String) As %ZEN.proxyObject [ Internal ]
 {
@@ -253,6 +286,9 @@ ClassMethod WidgetControlToProxyObject(Widget As %DeepSee.Dashboard.Widget, Numb
 	set obj.label = ##class(%DeepSee.UserPortal.Utils).%ResolveText(obj.label)
 	set obj.source = Widget.name
 
+	set filterDataType = ..GetCubeMeasuresDataType(Widget,Number,CubeName,.fDataType)
+	set obj.targetPropertyDataType = fDataType
+	
 	set:(obj.target="") obj.target = Widget.name
 
 	if ($e(obj.value)="@") {
