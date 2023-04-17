@@ -117,6 +117,10 @@ ClassMethod GetCubeMeasuresDataType(Widget, Number, CubeName, Output DataType As
 			
 			Set tMbrInfo = $G($$$DeepSeeMetaGLVN("cubes",$$$UPPER(CubeName),"mbr#",pDimNo,pHierNo,pLevelNo))
 			set DataType = $LG(tMbrInfo,6) // get data type
+			if '($FIND(DataType, "%")){ // if DataType return cube fact search for dataType in "star"
+				Set tMbrInfo = $G($$$DeepSeeMetaGLVN("cubes", $$$UPPER(CubeName), "star", DataType, "prop", $LG(tMbrInfo,7), "type")) 
+				set DataType = tMbrInfo 
+			}
 	}else{
 
 		set DataType = ""
