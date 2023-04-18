@@ -104,14 +104,11 @@ ClassMethod GetCubeMeasuresDataType(Widget, Number, CubeName, Output DataType As
 {
 
 	set st = $$$OK
-	set obj = $$$NewDynObj
-	set st = Widget.controls.GetAt(Number).%CopyTo(obj) // copy widget control properties to proxyObj
 	set dataSource = $piece(Widget.dataSource, ".", *) // get dataSource type
 
-
 	if (dataSource '= "kpi"){
-		if ($FIND(obj.targetProperty, "[")){
-			set tMeasure = $TRANSLATE(obj.targetProperty, "[]", "")
+		if ($FIND(Widget.controls.GetAt(Number).targetProperty, "[")){
+			set tMeasure = $TRANSLATE(Widget.controls.GetAt(Number).targetProperty, "[]", "")
 
 			set st = ##class(%DeepSee.Utils).%GetDimensionInfo(CubeName,tMeasure,.pDimNo,.pHierNo,.pLevelNo) // get positional info about dimension
 			
