@@ -149,6 +149,7 @@ ClassMethod WidgetToProxyObject(Widget As %DeepSee.Dashboard.Widget, CubeName As
 	if $piece(Widget.dataSource, ".", *) = "kpi" {
 		set kpiClass = ##class(%DeepSee.Utils).%GetKPIClass(Widget.dataSource)
 		set obj.kpitype = $classmethod(kpiClass, "%GetSourceType")
+		set obj.kpiclass = kpiClass // showing kpi class for implementing context menu button for kpi
 		
 	}
 	
