@@ -107,7 +107,7 @@ ClassMethod GetCubeMeasuresDataType(Widget, Number, CubeName, Output DataType As
 	set dataSource = $piece(Widget.dataSource, ".", *) // get dataSource type
 
 	if (dataSource '= "kpi"){
-		if ($FIND(Widget.controls.GetAt(Number).targetProperty, "[")){
+		if ($FIND(Widget.controls.GetAt(Number).targetProperty, "[") && $FIND(Widget.controls.GetAt(Number).targetProperty, ".")){
 			set tMeasure = $TRANSLATE(Widget.controls.GetAt(Number).targetProperty, "[]", "")
 
 			set st = ##class(%DeepSee.Utils).%GetDimensionInfo(CubeName,tMeasure,.pDimNo,.pHierNo,.pLevelNo) // get positional info about dimension
