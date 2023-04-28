@@ -92,7 +92,7 @@ ClassMethod WriteJSONfromQuery(CubeKey As %String, QueryKey As %String, Timeout 
 
 /// Execute SQL query taken from KPI and extract column values by name of column
 /// Output array with list of values like so pValue(n) = $LB(sNameList(i)...)
-ClassMethod getSQLValues(pSQL, Output pValues As %String) As %Status
+ClassMethod GetSQLValues(pSQL, Output pValues As %String, Output tResultSet As %SQL.Statement) As %Status
 {
 
 	set st = $$$OK
@@ -128,12 +128,11 @@ ClassMethod WriteDrillthroughJSONKPI(tKPI As %String, pFilters As %String, pSele
 	
 	if (kpitype="sql") {
 		set pSQL = $classmethod(tKpiClassName,"%OnGetListingSQL",pFilters,pSelection) // invoke corresponding method from given kpi and get sql query
-		Set stmt = ##class(%SQL.Statement).%ExecDirect(,pSQL)
-		set values = ..getSQLValues(pSQL, .pValue)
+		set values = ..GetSQLValues(pSQL, .pValue, .tResultSet)
 
-		for i=1:1:stmt.%GetMetadata().columnCount
+		for i=1:1:tResultSet.%GetMetadata().columnCount
 		{	
-			set pList(i) = stmt.%GetMetadata().columns.GetAt(i).label 
+			set pList(i) = tResultSet.%GetMetadata().columns.GetAt(i).label 
 			set pList(i, "columnNo") = i
 			Set tKpiPropIdx = $O(pList(""),1,tProperty)
 			Set tKpiPropList = ""
