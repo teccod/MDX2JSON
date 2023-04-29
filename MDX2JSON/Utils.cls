@@ -89,6 +89,35 @@ ClassMethod WriteJSONfromQuery(CubeKey As %String, QueryKey As %String, Timeout 
 	return $$$OK
 }
 
+
+/// Execute SQL query taken from KPI and extract column values by name of column
+/// Output array with list of values like so pValue(n) = $LB(sNameList(i)...)
+ClassMethod GetSQLValues(pSQL, Output pValues As %String, Output tResultSet As %SQL.Statement) As %Status
+{
+
+	set st = $$$OK
+	Set tResultSet = ##class(%SQL.Statement).%ExecDirect(,pSQL)
+		set tCount = 0
+		
+		while tResultSet.%Next()
+		{
+				set lValue = ""
+				for i=1:1:tResultSet.%GetMetadata().columnCount
+				{	
+					set sNameList(i) = tResultSet.%GetMetadata().columns.GetAt(i).label 
+					set lValue = lValue _ $lb(tResultSet.%Get(sNameList(i))) // append next column to the list
+				}
+
+			Set tCount = tCount + 1
+			set pValues(tCount) = lValue 
+		}	
+	return st
+}
+
+
+/// This method provides listing execution for KPI. 
+/// <b>tKPI<b> as a name of KPI class. <b>pFilters<b> not yet implemented 
+/// as a <b>pSelection<b>. Thats for future use. 
 ClassMethod WriteDrillthroughJSONKPI(tKPI As %String, pFilters As %String, pSelection As %String) As %Status
 {
 
@@ -98,15 +127,52 @@ ClassMethod WriteDrillthroughJSONKPI(tKPI As %String, pFilters As %String, pSele
 	set kpitype = $classmethod(tKpiClassName, "%GetSourceType")
 	
 	if (kpitype="sql") {
-		set pSQL = $classmethod(tKpiClassName, "%OnGetListingSQL", pFilters,pSelection) // invoke corresponding method from given kpi and get sql query
+		set pSQL = $classmethod(tKpiClassName,"%OnGetListingSQL",pFilters,pSelection) // invoke corresponding method from given kpi and get sql query
+		set values = ..GetSQLValues(pSQL, .pValue, .tResultSet)
+
+		for i=1:1:tResultSet.%GetMetadata().columnCount
+		{	
+			set pList(i) = tResultSet.%GetMetadata().columns.GetAt(i).label 
+			set pList(i, "columnNo") = i
+			Set tKpiPropIdx = $O(pList(""),1,tProperty)
+			Set tKpiPropList = ""
+			While (tKpiPropIdx'="") {
+				Set tKpiPropList = tKpiPropList _ $LB(tProperty)
+				Set tKpiPropArray(tKpiPropIdx) = $LB(tProperty,$G(pList(tKpiPropIdx,"name")),$G(pList(tKpiPropIdx,"columnNo")))
+				Set tKpiPropIdx = $O(pList(tKpiPropIdx),1,tProperty)
+				
+		}
+
+		}
+			Set tKpiSC = $classmethod(tKpiClassName,"%GetKPIValueArray",tKpiClassName,,.tKpiPropList,.tFilters)
+
+			Set tSC = ##class(%DeepSee.REST.v1.DataServer).%CreateObjectFromArray(.pValue,tKpiPropList,.tValueObj)		
+			If $$$ISERR(tSC) Quit
+
+			Set tSC = ##class(%DeepSee.REST.v1.DataServer).%CreateObjectFromArray(.tKpiPropArray,$LB("name","caption","columnNo"),.tPropObj)
+    		If $$$ISERR(tSC)
+
+			// Use consistent objects for normalized return
+			Set tProvider = ##class(%ZEN.Auxiliary.jsonMDXProvider).%New()
+			Set tInfoObj = tProvider.%ConstructNewDynamicObject()
+			Set tResultObj = tProvider.%ConstructNewDynamicObject()
+			
+			Set:$IsObject(tPropObj.children) tResultObj.Properties = tPropObj.children
+			Set:$IsObject(tValueObj.children) tResultObj.Series = tValueObj.children
+		
+			Set tInfoObj.Error = tProvider.%StatusToDynamicObject(tKpiSC)
+			Set tInfoObj.KpiName = tKpiClassName
+			
+			Set tKpiObj = tProvider.%ConstructNewDynamicObject()
+			Set tKpiObj.Info = tInfoObj
+			Set tKpiObj.Result = tResultObj
+
+			Set tSC = tProvider.%ObjectToJSON(tKpiObj)
 
 		}else{
 		
 			quit $$$ERROR($$$GeneralError, "KPI type " _ kpitype _ " not supported")
 	}
-
-	set st = ##class(%ZEN.Auxiliary.altJSONSQLProvider).%WriteJSONFromSQL(,pSQL,,$$$MaxCacheInt) // receiving sql and process it 
-	return:$$$ISERR(st) st
 	
 	return st
 }
