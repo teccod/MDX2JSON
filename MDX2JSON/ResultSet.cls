@@ -151,7 +151,7 @@ Method ProcessOneAxisCell(CubeIndex, AxisKey, CubeName, QueryKey, AxisNumber, No
 	}
 
 	//To filter out invisible сells
-	if (..IsCellNull(cell, AxisNumber, Node)=1) {
+	if (..IsCellNull(cell)=1) {
 		return cell.children
 	}
 	
@@ -198,11 +198,10 @@ Method ProcessOneAxisCell(CubeIndex, AxisKey, CubeName, QueryKey, AxisNumber, No
 	return cell
 }
 
-/// Determine if cell is an invisyble system cell.
-Method IsCellNull(Cell, AxisNumber, Node)
+/// Determine if cell is an invisible system cell.
+Method IsCellNull(Cell)
 {
-	return:((Cell.type = "axis") || (Cell.type = "set")) 1 // for top-level cells
-
+ 	
 	return:(Cell.caption=0) 1 // typical caption for top-level cell
 	return:(Cell.caption=1) 1 // typical caption for top-level cell
 	return:(Cell.caption="") 1 // typical caption for top-level cell
@@ -210,18 +209,11 @@ Method IsCellNull(Cell, AxisNumber, Node)
 	//return:(path="") 1
 	set children = Cell.children
 	return:(($isobject(children)) && ($$$ListSize(children)>0)) 0 // cell has children
-
-	if (Cell.type'="lit") {
-		set key = $O($$$DeepSeeResultsGLVN(..%CubeKey, ..%QueryKey, "leaf", AxisNumber, ""))
-		while (key'="") {
-			return:(Node=$$$DeepSeeResultsGLVN(..%CubeKey, ..%QueryKey, "leaf", AxisNumber, key)) 0 //for leafs
-			set key = $O($$$DeepSeeResultsGLVN(..%CubeKey, ..%QueryKey, "leaf", AxisNumber, key))
-		}
-	} else {
-		/// lit cell: SELECT %LABEL("Const","Title") ON 0 FROM [HoleFoodsBudget]
-		/// but also a lot of top-pevel cells
-		return 'Cell.vis
-	}
+	
+	// in case of cell type='lit'. the 'lit' cell always has the value vis=0, so we can skip it
+	// this is also true for type='axis' and type='set' so there is no need to check everything individually
+	return:(Cell.vis '= 0) 0 
+		
 
 	return 1
 }
