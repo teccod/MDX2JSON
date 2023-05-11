@@ -137,34 +137,37 @@ ClassMethod Test() As %Status
 /// Get all data sources including "pivot", "kpi", "worksheets","metrics"
 ClassMethod GetListDataSources() As %Status
 {
-	set st = $$$OK
-	
-	Set tProvider = ##class(%ZEN.Auxiliary.jsonMDXProvider).%New()
 
 	if $$$R("dataSource") = "pivot"
 	{
 		Set tSC = ##class(%DeepSee.Utils).%GetPivotListArray(.tParms,.pMetaData,.pData)
-		Quit tSC
+		
 	}
 	elseif $$$R("dataSource") = "kpi"
 	{
 		Set tSC = ##class(%DeepSee.Utils).%GetKPIListArray(.tParms,.pMetaData,.pData)
-		Quit tSC
+		
 	}
 	elseif $$$R("dataSource") = "worksheets"
 	{
 		Set tSC = ##class(%DeepSee.Utils).%GetWorksheetListArray(.tParms,.pMetaData,.pData)
-		Quit tSC
+		
 	}
 	elseif $$$R("datasource") = "metrics"
 	{
 		Set tSC = ##class(%DeepSee.Utils).%GetMetricListArray(.tParms,.pMetaData,.pData)
-		Quit tSC
+		
 	}
-	Set tSC = ##class(%DeepSee.REST.v1.DataServer).%CreateObjectFromArray(.pData,pMetaData,.tSourceObj)
-	Set tSC = tProvider.%ObjectToJSON(tSourceObj)
 	
-	return st
+	quit:$$$ISERR(tSC) tSC
+	
+	Set tSC = ##class(%DeepSee.REST.v1.DataServer).%CreateObjectFromArray(.pData,pMetaData,.tSourceObj)
+	
+	quit:$$$ISERR(tSC) tSC
+	
+	do tSourceObj.%ToJSON()
+	
+	quit tSC
 }
 
 
