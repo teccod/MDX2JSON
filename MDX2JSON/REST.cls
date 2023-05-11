@@ -66,6 +66,7 @@ XData UrlMap
 
    <!-- Get info about pivot-->
    <Route Url="/DataSource" Method="POST" Call="GetDataSource" />
+   <Route Url="/DataSourceList" Method="POST" Call="GetListDataSources" />
 
    <!-- Get info about pivot-->
    <Route Url="/TermList" Method="POST" Call="GetTermList" />
@@ -131,6 +132,44 @@ ClassMethod Test() As %Status
 	do obj.%ToJSON()
 	return $$$OK
 }
+
+
+/// Get all data sources including "pivot", "kpi", "worksheets","metrics"
+ClassMethod GetListDataSources() As %Status
+{
+
+	if $$$R("dataSource") = "pivot"
+	{
+		Set tSC = ##class(%DeepSee.Utils).%GetPivotListArray(.tParms,.pMetaData,.pData)
+		
+	}
+	elseif $$$R("dataSource") = "kpi"
+	{
+		Set tSC = ##class(%DeepSee.Utils).%GetKPIListArray(.tParms,.pMetaData,.pData)
+		
+	}
+	elseif $$$R("dataSource") = "worksheets"
+	{
+		Set tSC = ##class(%DeepSee.Utils).%GetWorksheetListArray(.tParms,.pMetaData,.pData)
+		
+	}
+	elseif $$$R("datasource") = "metrics"
+	{
+		Set tSC = ##class(%DeepSee.Utils).%GetMetricListArray(.tParms,.pMetaData,.pData)
+		
+	}
+	
+	quit:$$$ISERR(tSC) tSC
+	
+	Set tSC = ##class(%DeepSee.REST.v1.DataServer).%CreateObjectFromArray(.pData,pMetaData,.tSourceObj)
+	
+	quit:$$$ISERR(tSC) tSC
+	
+	do tSourceObj.%ToJSON()
+	
+	quit tSC
+}
+
 
 ClassMethod GetDataSource() As %Status
 {
