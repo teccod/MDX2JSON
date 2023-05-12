@@ -66,7 +66,7 @@ XData UrlMap
 
    <!-- Get info about pivot-->
    <Route Url="/DataSource" Method="POST" Call="GetDataSource" />
-   <Route Url="/DataSourceList" Method="POST" Call="GetListDataSources" />
+   <Route Url="/DataSourceList/:type" Method="POST" Call="GetListDataSources" />
 
    <!-- Get info about pivot-->
    <Route Url="/TermList" Method="POST" Call="GetTermList" />
@@ -135,25 +135,27 @@ ClassMethod Test() As %Status
 
 
 /// Get all data sources including "pivot", "kpi", "worksheets","metrics"
-ClassMethod GetListDataSources() As %Status
+ClassMethod GetListDataSources(Source) As %Status
 {
 
-	if $$$R("dataSource") = "pivot"
+	set Source = $ZCONVERT($ZCONVERT(Source ,"I","URL") ,"I","UTF8")
+
+	if (Source = "pivot")
 	{
 		Set tSC = ##class(%DeepSee.Utils).%GetPivotListArray(.tParms,.pMetaData,.pData)
 		
 	}
-	elseif $$$R("dataSource") = "kpi"
+	elseif (Source = "kpi")
 	{
 		Set tSC = ##class(%DeepSee.Utils).%GetKPIListArray(.tParms,.pMetaData,.pData)
-		
+
 	}
-	elseif $$$R("dataSource") = "worksheets"
+	elseif (Source = "worksheets")
 	{
 		Set tSC = ##class(%DeepSee.Utils).%GetWorksheetListArray(.tParms,.pMetaData,.pData)
 		
 	}
-	elseif $$$R("datasource") = "metrics"
+	elseif (Source = "metrics")
 	{
 		Set tSC = ##class(%DeepSee.Utils).%GetMetricListArray(.tParms,.pMetaData,.pData)
 		
