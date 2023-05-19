@@ -291,7 +291,7 @@ ClassMethod GetDataSource(pDataSource As %String)
 	set st = $$$OK
 	try {
 		
-		if ($FIND(pDataSource, ".pivot") = ($LENGTH(pDataSource) + 1)) {
+		if ($FIND(pDataSource, ".pivot") = ($LENGTH(pDataSource) + 1) && pDataSource '="") {
 			set st = ..OpenPivotByName(pDataSource, .dataSource)
 			return:($$$ISERR(st)) st
 			
