@@ -61,6 +61,9 @@ XData UrlMap
    <Route Url="/Widgets" Method="POST" Call="GetWidgetsList" />
    <Route Url="/Action/:Cube/:Action" Method="POST" Call="ExecuteAction"/>
 
+   <!-- Send dashboard JSON -->
+   <Route Url="/saveWidget" Method="POST" Call="saveWidget"/>
+
    <!-- Get info about system format and locale-->
    <Route Url="/Format" Method="GET" Call="GetFormat"/>
 
@@ -131,6 +134,15 @@ ClassMethod Test() As %Status
 	}
 	do obj.%ToJSON()
 	return $$$OK
+}
+
+ClassMethod saveWidget() As %Status
+{
+	set key = $$$R("key")
+	set widgetData= $$$R("WidgetData")
+	set dashboardData = $$$R("Dashboard")
+	
+	return ##class(MDX2JSON.Utils).AddWidget(widgetData,dashboardData,key)
 }
 
 

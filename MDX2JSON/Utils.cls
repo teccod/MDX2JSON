@@ -538,4 +538,78 @@ ClassMethod CreateAddonClass(Class As %Dictionary.CacheClassname) As %Status
 	quit classObj.%Save()
 }
 
+ClassMethod AddWidget(sWidget As %String, sDashboard As %String, key As %String) As %Status
+{
+	set st = $$$OK
+	set dExist=##class(%DeepSee.Dashboard.Utils).%DashboardExists(sDashboard) // check if dashboard exist
+	If (dExist = 1) 
+	{
+		Set tDash=##class(%DeepSee.Dashboard.Utils).%OpenDashboard(sDashboard, .st)
+		set tWidgets = ##class(%DeepSee.Dashboard.Widget).%New()
+		set tWidgets.name = sWidget.name
+		quit:sWidget.name=""
+		set tWidgets.title = sWidget.title
+		set tWidgets.dataSource = sWidget.dataSource
+		
+		// logic to work around weird line in ##classMDX2JSON.Dashboard.WidgetToProxyObject: 
+		// "set obj.type = Widget.subtype"
+		if (sWidget.type = "pivot") 
+		{
+			set tWidgets.type = "pivot"
+			set tWidgets.subtype = "pivot"
+		}
+			elseif (sWidget.type '= "pivot")
+			{
+				set tWidgets.type = "pivot"
+				set tWidgets.subtype = sWidget.type
+			}
+
+		set count = 0 // indicates wether or not the same name as key exists 
+		for i=1:1:tDash.widgets.Count()
+		{
+			if (tDash.widgets.GetAt(i).name = sWidget.name)
+			{	
+				set count = 1
+				return $$$ERROR()
+			}
+		}
+
+		
+		if (($LENGTH(key) = 0) & (count = 0)) // if key is empty and count = 1 widget is not insert
+		{
+			$$$Insert(tDash.widgets, tWidgets)
+			do tDash.%Save()
+	
+		}elseif ($LENGTH(key) > 0)
+		{	
+			
+			for i=1:1:tDash.widgets.Count()
+			{
+				if (tDash.widgets.GetAt(i).name = key)
+				{
+					set tDash.widgets.GetAt(i).name = sWidget.name
+					set tDash.widgets.GetAt(i).title = sWidget.title
+					set tDash.widgets.GetAt(i).dataSource = sWidget.dataSource
+
+					if (sWidget.type = "pivot") 
+					{
+						set tDash.widgets.GetAt(i).type = "pivot"
+						set tDash.widgets.GetAt(i).subtype = "pivot"
+					}
+						elseif (sWidget.type '= "pivot")
+						{
+							set tDash.widgets.GetAt(i).type = "pivot"
+							set tDash.widgets.GetAt(i).subtype = sWidget.type
+						}
+					do tDash.%Save()
+					
+				}
+			}
+		}
+
+
+	}	
+	return st
+}
+
 }
