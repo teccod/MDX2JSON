@@ -136,7 +136,7 @@ ClassMethod Test() As %Status
 	return $$$OK
 }
 
-ClassMethod saveWidget()
+ClassMethod saveWidget() As %Status
 {
 	set key = $$$R("key")
 	set widgetData= $$$R("WidgetData")
