@@ -570,7 +570,6 @@ ClassMethod AddWidget(sWidget As %String, sDashboard As %String, key As %String)
 			if (tDash.widgets.GetAt(i).name = sWidget.name)
 			{	
 				set count = 1
-				return $$$ERROR()
 			}
 		}
 
