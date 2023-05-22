@@ -28,7 +28,7 @@ ClassMethod OnPreDispatch(pUrl As %String, pMethod As %String, ByRef pContinue A
 	
 	Set st = ..ConvertRequestBody()
 	If $$$ISERR(st) {
-		Do ..Http500(st)
+		#; Do ..Http500(st)
 		Set pContinue = $$$NO
 		Quit st
 	}
@@ -37,7 +37,7 @@ ClassMethod OnPreDispatch(pUrl As %String, pMethod As %String, ByRef pContinue A
 	Set Namespace = %request.Get("Namespace", $namespace)
 	Set st = ..CheckNamespace(.Namespace)
 	If $$$ISERR(st) {
-		Do ..Http500(st)
+		#; Do ..Http500(st)
 		Set pContinue = $$$NO 
 		Quit
 	}
@@ -114,22 +114,6 @@ ClassMethod Login(skipheader As %Boolean = 1) As %Status
 	Return $$$OK
 }
 
-/// Issue an '500' error and give some indication as to what occurred.<br>
-/// <b>pStatus</b> - %status, not %Exception.AbstractException.
-ClassMethod Http500(pStatus As %Exception.AbstractException) As %Status
-{
-	// we are expecting status
-	#; Set the response Http status
-	Set %response.Status="500 Internal Server Error"
-	
-	#; Skip duplicate calls 
-	Quit:$isObject(pStatus) $$$OK
-	
-	#; Return a helpful error string
-	Write "{""Error"":"_$$$ZENJSSTR($System.Status.GetErrorText(pStatus,%session.Language))_"}"
-
-	Quit $$$OK
-}
 
 /// Returns info about MDX2JSON package mapping
 ClassMethod GetMappings() As %ArrayOfObjects
