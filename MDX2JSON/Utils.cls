@@ -538,77 +538,98 @@ ClassMethod CreateAddonClass(Class As %Dictionary.CacheClassname) As %Status
 	quit classObj.%Save()
 }
 
+/// Add new widgets and edit existing ones.
 ClassMethod AddWidget(sWidget As %String, sDashboard As %String, key As %String) As %Status
 {
 	set st = $$$OK
-	set dExist=##class(%DeepSee.Dashboard.Utils).%DashboardExists(sDashboard) // check if dashboard exist
-	If (dExist = 1) 
-	{
-		Set tDash=##class(%DeepSee.Dashboard.Utils).%OpenDashboard(sDashboard, .st)
-		set tWidgets = ##class(%DeepSee.Dashboard.Widget).%New()
-		set tWidgets.name = sWidget.name
-		quit:sWidget.name=""
-		set tWidgets.title = sWidget.title
-		set tWidgets.dataSource = sWidget.dataSource
-		
-		// logic to work around weird line in ##classMDX2JSON.Dashboard.WidgetToProxyObject: 
-		// "set obj.type = Widget.subtype"
-		if (sWidget.type = "pivot") 
-		{
-			set tWidgets.type = "pivot"
-			set tWidgets.subtype = "pivot"
-		}
-			elseif (sWidget.type '= "pivot")
-			{
-				set tWidgets.type = "pivot"
-				set tWidgets.subtype = sWidget.type
-			}
+	set dExist=##class(%DeepSee.Dashboard.Utils).%DashboardExists(sDashboard) 
 
-		set count = 0 // indicates wether or not the same name as key exists 
+	// Check if dashboard exists
+	If (dExist '= 1) 
+	{
+		Quit $$$ERROR($$$GeneralError,"Dashboard " _ sDashboard _ " does not exists")
+	}
+	Set tDash=##class(%DeepSee.Dashboard.Utils).%OpenDashboard(sDashboard, .st)
+	
+	// Check if widget with name is exists
+	set isExists = 0 
+	for i=1:1:tDash.widgets.Count()
+	{
+		if (tDash.widgets.GetAt(i).name = sWidget.name)
+		{	
+			set isExists = 1
+		}
+	}
+
+	// Adding new widget
+	if ($LENGTH(key) = 0) { // if key received empty then we expect new widget if not then else logic is working
+		// Check if we trying to create widget with exists name
+		if (isExists = 1) {
+			return $$$ERROR($$$GeneralError,"Widget " _ sWidget.name _ " already exists")
+		}
+
+		set tWidgets = ##class(%DeepSee.Dashboard.Widget).%New()
+		do ..UpdateWidget(tWidgets, sWidget)
+
+		$$$Insert(tDash.widgets, tWidgets)
+		do tDash.%Save()
+
+	} else {		
+		// Edit exists widget				
 		for i=1:1:tDash.widgets.Count()
 		{
-			if (tDash.widgets.GetAt(i).name = sWidget.name)
-			{	
-				set count = 1
-			}
-		}
 
-		
-		if (($LENGTH(key) = 0) & (count = 0)) // if key is empty and count = 1 widget is not insert
-		{
-			$$$Insert(tDash.widgets, tWidgets)
-			do tDash.%Save()
-	
-		}elseif ($LENGTH(key) > 0)
-		{	
-			
-			for i=1:1:tDash.widgets.Count()
+			set dWidgets = tDash.widgets.GetAt(i)
+
+			// Check if we trying to change widget name with exists one
+			if ((dWidgets.name '= key) && (dWidgets.name = sWidget.name)) {
+				return $$$ERROR($$$GeneralError,"Widget " _ sWidget.name _ " already exists")
+
+			}
+
+			if (dWidgets.name = key)
 			{
-				if (tDash.widgets.GetAt(i).name = key)
-				{
-					set tDash.widgets.GetAt(i).name = sWidget.name
-					set tDash.widgets.GetAt(i).title = sWidget.title
-					set tDash.widgets.GetAt(i).dataSource = sWidget.dataSource
-
-					if (sWidget.type = "pivot") 
-					{
-						set tDash.widgets.GetAt(i).type = "pivot"
-						set tDash.widgets.GetAt(i).subtype = "pivot"
-					}
-						elseif (sWidget.type '= "pivot")
-						{
-							set tDash.widgets.GetAt(i).type = "pivot"
-							set tDash.widgets.GetAt(i).subtype = sWidget.type
-						}
-					do tDash.%Save()
-					
-				}
+				set changed = dWidgets
 			}
 		}
-
-
-	}	
+		if (changed '= "") {
+			do ..UpdateWidget(changed, sWidget)
+			do tDash.%Save()	
+		}
+	}		
+		
 	return st
+}
+
+/// the collection of necessary parameters for building widget 
+ClassMethod UpdateWidget(widgetToUpdate As %DeepSee.Dashboard.Widget, data As %ZEN.proxyObject)
+{
+	set widgetToUpdate.name = data.name
+	set widgetToUpdate.title = data.title
+	set widgetToUpdate.dataSource = data.dataSource
+	set widgetToUpdate.dataLink = data.dataLink
+
+	if (data.displayInfo '= "") {
+	  set widgetToUpdate.top = data.displayInfo.top
+	  set widgetToUpdate.left = data.displayInfo.left
+	  set widgetToUpdate.width = data.displayInfo.width
+	  set widgetToUpdate.height = data.displayInfo.height
+	  set widgetToUpdate.homeColL = data.displayInfo.topCol
+	  set widgetToUpdate.homeRowL = data.displayInfo.leftRow
+	  set widgetToUpdate.colSpanL = data.displayInfo.colWidth
+	  set widgetToUpdate.rowSpanL = data.displayInfo.rowHeight
+	 }
+
+	if (data.type = "pivot") 
+	{
+		set widgetToUpdate.type = "pivot"
+		set widgetToUpdate.subtype = "pivot"
+	}
+	elseif (data.type '= "pivot")
+	{
+		set widgetToUpdate.type = "pivot"
+		set widgetToUpdate.subtype = data.type
+	}
 }
 
 }
