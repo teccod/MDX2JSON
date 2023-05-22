@@ -291,7 +291,7 @@ ClassMethod GetDataSource(pDataSource As %String)
 	set st = $$$OK
 	try {
 		
-		if ($FIND(pDataSource, ".pivot") = ($LENGTH(pDataSource) + 1)) {
+		if ($FIND(pDataSource, ".pivot") = ($LENGTH(pDataSource) + 1) && pDataSource '="") {
 			set st = ..OpenPivotByName(pDataSource, .dataSource)
 			return:($$$ISERR(st)) st
 			
@@ -578,11 +578,13 @@ ClassMethod AddWidget(sWidget As %String, sDashboard As %String, key As %String)
 		// Edit exists widget				
 		for i=1:1:tDash.widgets.Count()
 		{
+
 			set dWidgets = tDash.widgets.GetAt(i)
 
 			// Check if we trying to change widget name with exists one
 			if ((dWidgets.name '= key) && (dWidgets.name = sWidget.name)) {
 				return $$$ERROR($$$GeneralError,"Widget " _ sWidget.name _ " already exists")
+
 			}
 
 			if (dWidgets.name = key)
