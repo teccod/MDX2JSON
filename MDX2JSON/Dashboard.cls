@@ -142,7 +142,7 @@ ClassMethod WidgetToProxyObject(Widget As %DeepSee.Dashboard.Widget, CubeName As
 		// Linked widgets processing
 		set mdx = ""
 		set basemdx = ""
-		set obj.Link = Widget.dataLink
+		set obj.dataLink = Widget.dataLink
 	}
 	
 	// datasource is a kpi
