@@ -607,6 +607,17 @@ ClassMethod UpdateWidget(widgetToUpdate As %DeepSee.Dashboard.Widget, data As %Z
 	set widgetToUpdate.dataSource = data.dataSource
 	set widgetToUpdate.dataLink = data.dataLink
 
+	if (data.displayInfo '= "") {
+	  set widgetToUpdate.top = data.displayInfo.top
+	  set widgetToUpdate.left = data.displayInfo.left
+	  set widgetToUpdate.width = data.displayInfo.width
+	  set widgetToUpdate.height = data.displayInfo.height
+	  set widgetToUpdate.homeColL = data.displayInfo.topCol
+	  set widgetToUpdate.homeRowL = data.displayInfo.leftRow
+	  set widgetToUpdate.colSpanL = data.displayInfo.colWidth
+	  set widgetToUpdate.rowSpanL = data.displayInfo.rowHeight
+	 }
+
 	if (data.type = "pivot") 
 	{
 		set widgetToUpdate.type = "pivot"
