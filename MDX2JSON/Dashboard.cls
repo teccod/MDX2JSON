@@ -105,28 +105,30 @@ ClassMethod GetCubeMeasuresDataType(Widget, Number, CubeName, Output DataType As
 
 	set st = $$$OK
 	set dataSource = $piece(Widget.dataSource, ".", *) // get dataSource type
+	try{
+		if ((dataSource '= "kpi") && (dataSource '= "")){
+			if ($FIND(Widget.controls.GetAt(Number).targetProperty, "[") && $FIND(Widget.controls.GetAt(Number).targetProperty, ".")){
+				set tMeasure = $TRANSLATE(Widget.controls.GetAt(Number).targetProperty, "[]", "")
 
-	if ((dataSource '= "kpi") && (dataSource '= "")){
-		if ($FIND(Widget.controls.GetAt(Number).targetProperty, "[") && $FIND(Widget.controls.GetAt(Number).targetProperty, ".")){
-			set tMeasure = $TRANSLATE(Widget.controls.GetAt(Number).targetProperty, "[]", "")
+				set st = ##class(%DeepSee.Utils).%GetDimensionInfo(CubeName,tMeasure,.pDimNo,.pHierNo,.pLevelNo) // get positional info about dimension
 
-			set st = ##class(%DeepSee.Utils).%GetDimensionInfo(CubeName,tMeasure,.pDimNo,.pHierNo,.pLevelNo) // get positional info about dimension
-			
-			Set tMbrInfo = $G($$$DeepSeeMetaGLVN("cubes",$$$UPPER(CubeName),"mbr#",pDimNo,pHierNo,pLevelNo))
-			set DataType = $LG(tMbrInfo,6) // get data type
-			if '($FIND(DataType, "%")){ // if DataType return cube fact search for dataType in "star"
-				Set tMbrInfo = $G($$$DeepSeeMetaGLVN("cubes", $$$UPPER(CubeName), "star", DataType, "prop", $LG(tMbrInfo,7), "type")) 
-				set DataType = tMbrInfo 
-			}
-	}else{
+				Set tMbrInfo = $G($$$DeepSeeMetaGLVN("cubes",$$$UPPER(CubeName),"mbr#",pDimNo,pHierNo,pLevelNo))
+				set DataType = $LG(tMbrInfo,6) // get data type
+				if '($FIND(DataType, "%")){ // if DataType return cube fact search for dataType in "star"
+					Set tMbrInfo = $G($$$DeepSeeMetaGLVN("cubes", $$$UPPER(CubeName), "star", DataType, "prop", $LG(tMbrInfo,7), "type")) 
+					set DataType = tMbrInfo 
+				}
+		}else{
 
-		set DataType = ""
+			set DataType = ""
+		}
+		}else{
+
+			set DataType = ""
+		}
+	}catch ex {
+		set st = ex.AsStatus()
 	}
-	}else{
-
-		set DataType = ""
-	}
-	
 	return st
 }
 
