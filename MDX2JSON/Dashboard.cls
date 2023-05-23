@@ -106,7 +106,7 @@ ClassMethod GetCubeMeasuresDataType(Widget, Number, CubeName, Output DataType As
 	set st = $$$OK
 	set dataSource = $piece(Widget.dataSource, ".", *) // get dataSource type
 
-	if (dataSource '= "kpi"){
+	if ((dataSource '= "kpi") && (dataSource '= "")){
 		if ($FIND(Widget.controls.GetAt(Number).targetProperty, "[") && $FIND(Widget.controls.GetAt(Number).targetProperty, ".")){
 			set tMeasure = $TRANSLATE(Widget.controls.GetAt(Number).targetProperty, "[]", "")
 
