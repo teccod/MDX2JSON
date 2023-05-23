@@ -63,6 +63,7 @@ XData UrlMap
 
    <!-- Send dashboard JSON -->
    <Route Url="/saveWidget" Method="POST" Call="saveWidget"/>
+   <Route Url="/deleteWidget" Method="POST" Call="deleteWidget"/>
 
    <!-- Get info about system format and locale-->
    <Route Url="/Format" Method="GET" Call="GetFormat"/>
@@ -134,6 +135,14 @@ ClassMethod Test() As %Status
 	}
 	do obj.%ToJSON()
 	return $$$OK
+}
+
+ClassMethod deleteWidget() As %Status
+{
+	set name = $$$R("key")
+	set dashboardData = $$$R("Dashboard")
+	
+	return ##class(MDX2JSON.Utils).DeleteWidget(name,dashboardData)
 }
 
 ClassMethod saveWidget() As %Status

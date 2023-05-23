@@ -538,7 +538,9 @@ ClassMethod CreateAddonClass(Class As %Dictionary.CacheClassname) As %Status
 	quit classObj.%Save()
 }
 
-/// Add new widgets and edit existing ones.
+/// Add new widgets and edit existing ones directly from DeepSeeWeb
+/// it takes widget name(key) as unique identifier as string, dashboard name as string
+/// and object with parameters as zen.proxyObject
 ClassMethod AddWidget(sWidget As %String, sDashboard As %String, key As %String) As %Status
 {
 	set st = $$$OK
@@ -569,7 +571,7 @@ ClassMethod AddWidget(sWidget As %String, sDashboard As %String, key As %String)
 		}
 
 		set tWidgets = ##class(%DeepSee.Dashboard.Widget).%New()
-		do ..UpdateWidget(tWidgets, sWidget)
+		set st = ..UpdateWidget(tWidgets, sWidget)
 
 		$$$Insert(tDash.widgets, tWidgets)
 		do tDash.%Save()
@@ -593,7 +595,7 @@ ClassMethod AddWidget(sWidget As %String, sDashboard As %String, key As %String)
 			}
 		}
 		if (changed '= "") {
-			do ..UpdateWidget(changed, sWidget)
+			set st = ..UpdateWidget(changed, sWidget)
 			do tDash.%Save()	
 		}
 	}		
@@ -601,13 +603,78 @@ ClassMethod AddWidget(sWidget As %String, sDashboard As %String, key As %String)
 	return st
 }
 
-/// the collection of necessary parameters for building widget 
-ClassMethod UpdateWidget(widgetToUpdate As %DeepSee.Dashboard.Widget, data As %ZEN.proxyObject)
+/// This method remove widget from dashboard directly from DeepSeeWeb
+/// it takes widget name as unique identifier and dashboard name 
+ClassMethod DeleteWidget(wName As %String, sDashboard As %String) As %Status
 {
+	set st = $$$OK
+
+	set dExist=##class(%DeepSee.Dashboard.Utils).%DashboardExists(sDashboard) 
+
+	// Check if dashboard exists
+	If (dExist '= 1) 
+	{
+		Quit $$$ERROR($$$GeneralError,"Dashboard " _ sDashboard _ " does not exists")
+	}
+	Set tDash=##class(%DeepSee.Dashboard.Utils).%OpenDashboard(sDashboard, .st)
+
+	// Check if widget with name is exists
+	set isExists = 0 
+	for i=1:1:tDash.widgets.Count()
+	{
+		if (tDash.widgets.GetAt(i).name = wName)
+		{	
+			set isExists = 1
+		}
+	}
+
+	if (isExists = 1)
+	{
+		for i=1:1:tDash.widgets.Count()
+		{
+			if (tDash.widgets.GetAt(i).name = wName) 
+			{
+				do tDash.widgets.RemoveAt(i)
+				do tDash.%Save()
+			}
+		}
+	}else
+	{
+		quit $$$ERROR($$$GeneralError,"Widget " _ wName _ " is not exists")
+
+	}
+
+	return st
+}
+
+
+/// the collection of necessary parameters for building widget 
+ClassMethod UpdateWidget(widgetToUpdate As %DeepSee.Dashboard.Widget, data As %ZEN.proxyObject) As %Status
+{
+	set st = $$$OK
+
 	set widgetToUpdate.name = data.name
 	set widgetToUpdate.title = data.title
-	set widgetToUpdate.dataSource = data.dataSource
+	if (data.dataSource = "")
+	{
+		quit $$$ERROR($$$GeneralError,"Parameter DataSource is not set")
+	}else
+	{
+		set widgetToUpdate.dataSource = data.dataSource
+	}
+	
 	set widgetToUpdate.dataLink = data.dataLink
+	
+	if (data.type = "pivot") 
+	{
+		set widgetToUpdate.type = "pivot"
+		set widgetToUpdate.subtype = "pivot"
+	}
+	elseif (data.type '= "pivot")
+	{
+		set widgetToUpdate.type = "pivot"
+		set widgetToUpdate.subtype = data.type
+	}
 
 	if (data.displayInfo '= "") {
 	  set widgetToUpdate.top = data.displayInfo.top
@@ -620,16 +687,7 @@ ClassMethod UpdateWidget(widgetToUpdate As %DeepSee.Dashboard.Widget, data As %Z
 	  set widgetToUpdate.rowSpanL = data.displayInfo.rowHeight
 	 }
 
-	if (data.type = "pivot") 
-	{
-		set widgetToUpdate.type = "pivot"
-		set widgetToUpdate.subtype = "pivot"
-	}
-	elseif (data.type '= "pivot")
-	{
-		set widgetToUpdate.type = "pivot"
-		set widgetToUpdate.subtype = data.type
-	}
+	return st
 }
 
 }
