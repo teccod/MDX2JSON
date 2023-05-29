@@ -573,7 +573,7 @@ ClassMethod AddWidget(sWidget As %String, sDashboard As %String, key As %String)
 		set tWidgets = ##class(%DeepSee.Dashboard.Widget).%New()
 		set st = ..UpdateWidget(tWidgets, sWidget)
 
-		if (st = $$$OK)
+		if (st = $$$OK) // checking for errors in UpdateWidget
 		{
 			$$$Insert(tDash.widgets, tWidgets)
 			do tDash.%Save()
@@ -599,7 +599,7 @@ ClassMethod AddWidget(sWidget As %String, sDashboard As %String, key As %String)
 		}
 		if (changed '= "") {
 			set st = ..UpdateWidget(changed, sWidget)
-			if (st = $$$OK)
+			if (st = $$$OK) // checking for errors in UpdateWidget
 			{
 				do tDash.%Save()	
 			}	
