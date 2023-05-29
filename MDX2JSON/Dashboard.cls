@@ -291,7 +291,11 @@ ClassMethod WidgetControlToProxyObject(Widget As %DeepSee.Dashboard.Widget, Numb
 	set obj.source = Widget.name
 
 	set filterDataType = ..GetCubeMeasuresDataType(Widget,Number,CubeName,.fDataType)
-	set obj.targetPropertyDataType = fDataType
+	
+	if ('fDataType) 
+	{
+		set obj.targetPropertyDataType = fDataType
+	}
 	
 	set:(obj.target="") obj.target = Widget.name
 
