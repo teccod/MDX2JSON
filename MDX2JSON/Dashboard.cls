@@ -290,9 +290,9 @@ ClassMethod WidgetControlToProxyObject(Widget As %DeepSee.Dashboard.Widget, Numb
 	set obj.label = ##class(%DeepSee.UserPortal.Utils).%ResolveText(obj.label)
 	set obj.source = Widget.name
 
-	set filterDataType = ..GetCubeMeasuresDataType(Widget,Number,CubeName,.fDataType)
-	
-	if ('fDataType) 
+	set st = ..GetCubeMeasuresDataType(Widget,Number,CubeName,.fDataType)
+
+	if (st = $$$OK)
 	{
 		set obj.targetPropertyDataType = fDataType
 	}
