@@ -57,17 +57,36 @@ ClassMethod ExecuteResultSet(RS As MDX2JSON.ResultSet, QueryKey As %String = "",
 /// <b>MDX</b> - String containing MDX query.<br>
 ClassMethod WriteJSONfromMDX(MDX As %String, Timeout As %Integer = 0) As %Status
 {
+	Set tSC = $$$OK
 	#dim RS As MDX2JSON.ResultSet
-	set RS = ..GetResultSet(MDX, .st)
-	return:$$$ISERR(st) st
+
+	set RS = ..GetResultSet(MDX, .tSC)
+	set cube = ##class(%DeepSee.Utils).%IsCubeCompound(RS.%Cube) // check if cube is compound type
+	return:$$$ISERR(tSC) tSC
+
+	if cube // if cube is compound then we prepare it using %ZEN.Auxiliary.jsonMDXProvider 
+	{
+		Set tProvider = ##class(%ZEN.Auxiliary.jsonMDXProvider).%New()
+		Set tProvider.mdxQuery = MDX
+		Set tWait = %session.AppTimeout - $S(%session.AppTimeout>2:2,1:0)	// Send something back jst before the appTimeout is reached	
+                Set tSC = ##class(%DeepSee.REST.v1.DataServer).%WaitForProviderResults(tProvider,tWait)
 	
-	set st = ..ExecuteResultSet(RS, , Timeout)
-	return:$$$ISERR(st) st
+		set tSC = ..ExecuteResultSet(RS, ,Timeout)
+		return:$$$ISERR(tSC) tSC
 		
-	set obj = RS.ToProxyObject(.st)
-	return:$$$ISERR(st) st
-	$$$DynObjToJSON(obj)
+		set obj = RS.ToProxyObject(.tSC)
+		return:$$$ISERR(tSC) tSC
+		$$$DynObjToJSON(obj)
 	
+	}else{ // if cube is not compound execute the query in usual way
+
+		set tSC = ..ExecuteResultSet(RS, ,Timeout)
+		return:$$$ISERR(tSC) tSC
+		
+		set obj = RS.ToProxyObject(.tSC)
+		return:$$$ISERR(tSC) tSC
+		$$$DynObjToJSON(obj)
+	}
 	return $$$OK
 }
 
